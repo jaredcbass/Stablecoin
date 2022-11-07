@@ -1,0 +1,41 @@
+service: defender-serverless
+configValidationMode: error
+frameworkVersion: '3'
+useDotenv: true
+plugins:
+  - defender-serverless
+
+provider:
+  name: defender
+  stage: ${opt:stage, 'dev'}
+  stackName: 'Stablecoin'
+  ssot: false
+
+defender:
+  key: "${env:API_KEY}"
+  secret: "${env:API_SECRET}"
+
+functions:
+  autotask-1:
+    name: 'Stablecoin Mint'
+    path: './autotasks/mint'
+    relayer: ${self:resources.Resources.relayers.relayer-1}
+    trigger:
+      type: "webhook"
+    paused: false
+
+resources:
+  Resources:
+    policies:
+      policy-1:
+        gas-price-cap: 10000000000
+        eip1559-pricing: true
+
+    relayers:
+      relayer-1:
+        name: "Stablecoin Goerli"
+        network: "goerli"
+        min-balance: 1000
+        policy: ${self:resources.Resources.policies.policy-1}
+        api-keys:
+          - key1
